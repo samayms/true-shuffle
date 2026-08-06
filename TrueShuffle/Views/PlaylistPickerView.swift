@@ -17,10 +17,18 @@ struct PlaylistPickerView: View {
                 .navigationTitle("True Shuffle")
                 .toolbar {
                     ToolbarItem(placement: .topBarTrailing) {
-                        Toggle("Downloaded only", isOn: $model.downloadedOnly)
-                            .toggleStyle(.button)
-                            .labelStyle(.iconOnly)
-                            .accessibilityLabel("Downloaded songs only")
+                        // The label must carry an icon of its own: `.iconOnly`
+                        // on a text-only Toggle renders an empty button.
+                        Toggle(isOn: $model.downloadedOnly) {
+                            Label(
+                                "Downloaded songs only",
+                                systemImage: model.downloadedOnly
+                                    ? "arrow.down.circle.fill"
+                                    : "arrow.down.circle"
+                            )
+                        }
+                        .toggleStyle(.button)
+                        .labelStyle(.iconOnly)
                     }
                 }
         }
