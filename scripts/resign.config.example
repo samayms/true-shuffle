@@ -1,0 +1,8 @@
+# Copy this file to `resign.config` (untracked) and fill in your device ID.
+#
+# Find the identifier with:
+#   ./scripts/resign.sh --list
+# or:
+#   xcrun devicectl list devices
+
+DEVICE_ID=""
