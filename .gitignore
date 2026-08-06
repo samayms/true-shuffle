@@ -43,3 +43,6 @@ xcuserdata/
 /playwright-report/
 /test-results/
 /coverage/
+
+# Xcode local user state
+*.xcuserdatad/
