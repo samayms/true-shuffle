@@ -152,6 +152,35 @@ Open the app and tap **Allow** when it asks for media library access.
 **Connect via Network**. Wait for the 🌐 icon, then unplug. Every future install
 happens over Wi-Fi as long as both devices are on the same network.
 
+A correctly configured device shows:
+
+| What you see | What it means |
+|---|---|
+| 🌐 beside the device name | Network connection is live — this is the whole point of the step |
+| Identifier's second UUID | Must match `DEVICE_ID` in `scripts/resign.config` |
+| No errors or warnings | Nothing to fix |
+| **True Shuffle** under Installed Apps | The app is on the phone |
+| Device Conditions: **None** | Correct — that's a network-throttling test tool, unrelated to signing |
+
+> [!NOTE]
+> The widget does **not** appear as its own row under Installed Apps, and that
+> is not a failure. App extensions ship inside the host app's bundle, so
+> `TrueShuffleWidgetExtension.appex` is part of the single True Shuffle entry.
+> To confirm it really shipped, check the built product instead:
+>
+> ```bash
+> ls TrueShuffle.app/PlugIns/
+> ```
+
+The same check from the command line, without opening Xcode:
+
+```bash
+xcrun devicectl list devices
+```
+
+A hostname ending in `.coredevice.local` and a state of `connected` means the
+phone is reachable over the network right now.
+
 ### 5. Keep it installed
 
 Free signing certificates expire after **7 days**, after which the app stops
@@ -171,6 +200,38 @@ over Wi-Fi.
 > `security set-key-partition-list`, the first headless build blocks on a GUI
 > password prompt that nobody is awake to answer, and the automation hangs
 > silently until you notice the app has stopped opening.
+
+Verify it end to end before trusting it. The script skips if it already ran
+today, so force a run:
+
+```bash
+./scripts/resign.sh --force
+tail ~/.local/state/true-shuffle/resign.log
+```
+
+The widget needs no separate handling: it has its own bundle ID and its own
+profile on the same 7-day clock, but `resign.sh` builds the whole scheme and the
+extension is embedded in the app, so one pass refreshes both. Check what the
+signing actually produced with:
+
+```bash
+security cms -D -i <path>/TrueShuffle.app/PlugIns/TrueShuffleWidgetExtension.appex/embedded.mobileprovision \
+  | plutil -p - | grep ExpirationDate
+```
+
+#### Where this still breaks
+
+"Automated" is not "unconditional". Three things will silently stop it, and you
+won't find out until the app refuses to open:
+
+- **The Mac must wake at least once every 7 days.** SleepWatcher triggers on
+  wake; no wake, no re-sign. If your Mac tends to stay running for days, a
+  `launchd` agent on a calendar interval is the more robust trigger.
+- **The iPhone must be on the same Wi-Fi at that moment.** If it isn't, the run
+  logs the miss and exits *without* recording success, so the next wake retries.
+- **Wireless deploy is genuinely flaky.** `resign.sh` already retries three
+  times with backoff and raises a macOS notification on real failure — that
+  notification exists precisely because a silent 3am failure is the risk.
 
 ## Using it from Shortcuts
 
