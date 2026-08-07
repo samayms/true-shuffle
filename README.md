@@ -194,9 +194,13 @@ Long-press the Home Screen → **Edit** → **Add Widget** → **True Shuffle**.
 
 | Size | Shows | Notes |
 |---|---|---|
-| Small | One playlist | The whole tile is the button |
-| Medium | Three playlists | One row each |
-| Large | Six playlists | The whole choice at a glance |
+| Small | Three playlists | Tight type, 22pt buttons |
+| Medium | Three playlists | The same rows with room to breathe |
+| Large | Six playlists | Adds how long ago each was played |
+
+Every size is the same object — hairline-separated rows dividing the full
+height evenly — so nothing scrolls and the row count never depends on how many
+playlists you happen to have.
 
 Tapping a row shuffles that playlist and starts it in the Music app. Nothing
 opens — the button runs an `AudioPlaybackIntent` inside the widget extension
@@ -240,11 +244,9 @@ TrueShuffleWidget/
 ├── SelectPlaylistsIntent.swift    The three Edit Widget slots
 ├── ShuffleFromWidgetIntent.swift  What a button tap runs
 ├── WidgetModel.swift              The timeline entry
-├── WidgetChrome.swift             Play badge, caption, shared tokens
+├── WidgetChrome.swift             Play badge and shared tokens
 └── Views/
-    ├── SmallShuffleView.swift     158 × 158 — one playlist
-    ├── MediumShuffleView.swift    338 × 158 — three
-    └── LargeShuffleView.swift     338 × 354 — six
+    └── ShuffleRowsView.swift      The row list, plus per-size constants
 
 scripts/
 ├── resign.sh                  Daily rebuild + wireless reinstall
