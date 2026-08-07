@@ -107,7 +107,7 @@ struct ShuffleWidget: Widget {
         .configurationDisplayName("True Shuffle")
         .description("Shuffle a playlist into a genuinely random order, straight from the Home Screen.")
         .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
-        // The design specifies its own padding per size — 14pt in the small
+        // The design specifies its own padding per size — 12/13 in the small
         // widget, 12/16 in the medium — which the default content margins would
         // sit on top of.
         .contentMarginsDisabled()
@@ -119,13 +119,14 @@ struct ShuffleWidgetView: View {
     let entry: ShuffleEntry
 
     var body: some View {
+        ShuffleRowsView(entry: entry, style: style)
+    }
+
+    private var style: RowStyle {
         switch family {
-        case .systemSmall:
-            SmallShuffleView(entry: entry)
-        case .systemLarge:
-            LargeShuffleView(entry: entry)
-        default:
-            MediumShuffleView(entry: entry)
+        case .systemSmall: .small
+        case .systemLarge: .large
+        default: .medium
         }
     }
 }

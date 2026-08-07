@@ -1,19 +1,8 @@
 import SwiftUI
 
-/// The shared vocabulary of the three widget layouts.
-///
-/// The design draws exactly one accent object — the coral play button — and one
-/// piece of chrome, the "TRUE SHUFFLE" caption. Both appear in all three sizes
-/// at different scales, so they live here rather than being re-derived per view
-/// and drifting apart.
+/// Tokens the widget needs that the app's `Theme` doesn't carry.
 enum WidgetChrome {
-    /// Design tokens that only the widget uses. Everything else comes from
-    /// `Theme`, which the app and the widget share.
-    static let captionColor = Color(red: 0.922, green: 0.922, blue: 0.961).opacity(0.50)
-    static let hintColor = Color(red: 0.922, green: 0.922, blue: 0.961).opacity(0.35)
-    static let rowFill = Color.white.opacity(0.06)
     static let hairline = Color(red: 0.329, green: 0.329, blue: 0.345).opacity(0.45)
-    static let widgetRadius: CGFloat = 24
 
     /// How far to lift a row's name/detail pair so it looks vertically centred.
     ///
@@ -23,16 +12,16 @@ enum WidgetChrome {
     /// detail line. Measured against a render, the visible ink lands 1pt below
     /// the row's true centre, so the pair is raised by that much.
     ///
-    /// This is what makes a divider look wrong before it is applied: the gap
-    /// above a hairline comes out around 4pt against 6pt below it, even though
-    /// the boxes either side are exactly symmetric.
+    /// This is what makes the hairlines look wrong before it is applied: the gap
+    /// above a line comes out around 4pt against 6pt below it, even though the
+    /// boxes either side are exactly symmetric.
     static let rowTextOpticalRise: CGFloat = 1
 }
 
 /// The right-pointing play triangle.
 ///
 /// Drawn rather than using `Image(systemName: "play.fill")`: the SF Symbol has
-/// its own optical padding and slightly rounded corners, so at 8–11pt inside a
+/// its own optical padding and slightly rounded corners, so at 7–9pt inside a
 /// small circle it reads visibly smaller and softer than the flat triangle the
 /// design specifies.
 struct PlayTriangle: Shape {
@@ -46,38 +35,20 @@ struct PlayTriangle: Shape {
     }
 }
 
-/// The coral circle that every tappable row ends with.
+/// The coral circle that every row ends with.
 ///
 /// Purely visual — the tap target is the whole row's `Button`, which is why this
 /// is a plain view and not a control.
 struct PlayBadge: View {
-    /// The design gives each badge size its own triangle rather than scaling one,
-    /// so both sets of numbers are transcribed instead of derived.
     struct Metrics {
         let diameter: CGFloat
         let triangleWidth: CGFloat
         let triangleHeight: CGFloat
 
-        /// How far right of the circle's geometric centre the triangle sits.
-        ///
-        /// A triangle's centroid is one third of the way from base to apex, but
-        /// its bounding box centres at one half — so a box-centred triangle
-        /// always reads as sitting left. Shifting by the difference,
-        /// `w/2 - w/3 = w/6`, puts the centre of mass on the circle's centre,
-        /// which is what the eye actually judges.
-        ///
-        /// The design expresses the same intent as a `margin-left` nudge, but
-        /// transcribing that number is a trap: the margin sits on a flex item
-        /// in a `justify-content: center` container, so it widens the item's
-        /// outer box and the browser re-centres *that*, moving the triangle by
-        /// only half the stated value. The centroid rule is what it was
-        /// approximating, so use it directly.
-        var opticalOffset: CGFloat { triangleWidth / 6 }
-
         /// The small widget's badge.
-        static let large = Metrics(diameter: 34, triangleWidth: 11, triangleHeight: 13)
+        static let compact = Metrics(diameter: 22, triangleWidth: 7, triangleHeight: 9)
         /// Medium and large widgets.
-        static let small = Metrics(diameter: 26, triangleWidth: 8, triangleHeight: 10)
+        static let standard = Metrics(diameter: 28, triangleWidth: 9, triangleHeight: 11)
     }
 
     let metrics: Metrics
@@ -85,23 +56,18 @@ struct PlayBadge: View {
     var body: some View {
         ZStack {
             Circle().fill(Theme.signal)
+            // Centred on its bounding box, with no optical nudge to the right.
+            //
+            // Both the design's `margin-left` and the usual centroid correction
+            // push the triangle right, and both were tried; on the device each
+            // read as visibly off-centre. At these diameters the circle is small
+            // enough that any rightward shift is more obvious than the
+            // centre-of-mass imbalance it is meant to correct.
             PlayTriangle()
                 .fill(.white)
                 .frame(width: metrics.triangleWidth, height: metrics.triangleHeight)
-                .offset(x: metrics.opticalOffset)
         }
         .frame(width: metrics.diameter, height: metrics.diameter)
-    }
-}
-
-/// "TRUE SHUFFLE" — the same caption in all three sizes.
-struct WidgetCaption: View {
-    var body: some View {
-        Text("True Shuffle")
-            .font(.system(size: 11.5, weight: .semibold))
-            .textCase(.uppercase)
-            .tracking(11.5 * 0.05)
-            .foregroundStyle(WidgetChrome.captionColor)
     }
 }
 
