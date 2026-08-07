@@ -24,7 +24,7 @@ xcuserdata/
 /skills-lock.json
 
 # Local planning, research, notes, and implementation handoffs
-# (PLAN.md is the one intentional exception — it's the tracked build spec)
+/PLAN.md
 /PRODUCT.md
 /PROGRESS.md
 /DESIGN.md
