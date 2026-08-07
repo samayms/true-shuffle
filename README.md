@@ -31,6 +31,9 @@ keys, and no `$99/year` Apple Developer Program.
 - **Built for Shortcuts.** Two actions, both of which run without opening the
   app — the intended everyday path is one tap from the home screen or the
   Action Button.
+- **Home Screen widget.** Three sizes showing one, three, or six playlists.
+  Every row is a button that shuffles and plays on the spot, with no app
+  launch at all.
 - **Stays installed.** Free provisioning expires every 7 days; an included
   script re-signs the app over Wi-Fi when you open your Mac.
 
@@ -185,6 +188,33 @@ visible app launch.
 
 Both actions also work with Siri (*"Shuffle my playlist with True Shuffle"*).
 
+## The widget
+
+Long-press the Home Screen → **Edit** → **Add Widget** → **True Shuffle**.
+
+| Size | Shows | Notes |
+|---|---|---|
+| Small | One playlist | The whole tile is the button |
+| Medium | Three playlists | One row each |
+| Large | Six playlists | The whole choice at a glance |
+
+Tapping a row shuffles that playlist and starts it in the Music app. Nothing
+opens — the button runs an `AudioPlaybackIntent` inside the widget extension
+itself, which reads the library and hands off the queue directly.
+
+**Choosing what appears.** Long-press the widget → **Edit Widget** gives three
+playlist slots. Any slot you fill is pinned to that position; any slot you
+leave empty falls back to what you shuffled or played most recently. An
+unconfigured widget is therefore already useful, which is why there is no
+in-app settings screen for this — the native sheet is the whole interface.
+
+> [!NOTE]
+> The widget extension is a separate process, and a free personal team can't
+> use App Groups, so the extension cannot read the app's stored history. What
+> the two *do* share is the music library itself — so the widget orders rows by
+> each playlist's most recent play date, which both processes can see. Shuffles
+> started from the widget's own buttons are recorded locally and take priority.
+
 ## Project layout
 
 ```
@@ -204,6 +234,17 @@ TrueShuffle/
 └── Intents/
     ├── PlaylistEntity.swift   Playlists as a Shortcuts entity
     └── ShuffleIntents.swift   The two actions + Siri phrases
+
+TrueShuffleWidget/
+├── ShuffleWidget.swift            Widget definition + timeline provider
+├── SelectPlaylistsIntent.swift    The three Edit Widget slots
+├── ShuffleFromWidgetIntent.swift  What a button tap runs
+├── WidgetModel.swift              The timeline entry
+├── WidgetChrome.swift             Play badge, caption, shared tokens
+└── Views/
+    ├── SmallShuffleView.swift     158 × 158 — one playlist
+    ├── MediumShuffleView.swift    338 × 158 — three
+    └── LargeShuffleView.swift     338 × 354 — six
 
 scripts/
 ├── resign.sh                  Daily rebuild + wireless reinstall
@@ -227,6 +268,14 @@ xcodebuild test  -scheme TrueShuffle -destination 'platform=iOS Simulator,name=i
 The Xcode project uses file-system-synchronized groups, so new Swift files
 under `TrueShuffle/` are picked up automatically without touching
 `project.pbxproj`.
+
+The widget extension is a second target that references the *same* `TrueShuffle`
+group, with membership exceptions for the parts that are the app's alone — its
+`@main` entry point, its views, its assets, and its Shortcuts provider.
+Everything else (the shuffle, the library reads, the theme) is shared source
+compiled into both, rather than a copy. A new file under `TrueShuffle/Model/`
+is therefore visible to the widget with no project edit; a new app-only view
+needs adding to that exception list.
 
 The simulator has no music library, so every real code path lands in an empty
 state there. To work on the UI without a device, launch with `-sampleData`:
