@@ -197,8 +197,8 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				AA0000000000000000000042 /* TrueShuffleWidget */,
 				AA0000000000000000000040 /* TrueShuffle */,
+				AA0000000000000000000042 /* TrueShuffleWidget */,
 			);
 			name = TrueShuffleWidgetExtension;
 			productName = TrueShuffleWidgetExtension;
