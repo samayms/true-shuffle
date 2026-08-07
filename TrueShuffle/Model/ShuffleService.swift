@@ -3,6 +3,7 @@ import MediaPlayer
 
 /// What a completed shuffle did, so the caller can report it.
 struct ShuffleOutcome: Sendable {
+    let playlistID: UInt64
     let playlistName: String
     let songCount: Int
     let firstSongTitle: String?
@@ -23,9 +24,10 @@ enum ShuffleService {
         let shuffled = Shuffle.fisherYates(songs)
         try play(shuffled)
 
-        AppSettings.lastPlaylistID = playlistID
+        AppSettings.recordShuffle(playlistID: playlistID, songCount: shuffled.count)
 
         return ShuffleOutcome(
+            playlistID: playlistID,
             playlistName: playlist.name,
             songCount: shuffled.count,
             firstSongTitle: shuffled.first?.title

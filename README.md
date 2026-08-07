@@ -20,6 +20,9 @@ keys, and no `$99/year` Apple Developer Program.
 - **Uniform shuffle.** Fisher–Yates with a cryptographic RNG, covered by tests
   that check positional uniformity and full permutation coverage — not just
   "it looks random."
+- **One screen.** A dark, system-native list: pick a playlist, it shuffles.
+  Recently shuffled playlists sit at the top, and a compact now-playing bar
+  gives you play/pause and a one-tap reshuffle.
 - **Real playback.** The queue is handed to the system Music app, so the lock
   screen, Control Center, CarPlay, AirPlay and background audio all work
   normally. This app implements none of them and doesn't need to.
@@ -190,16 +193,22 @@ TrueShuffle/
 │   ├── Shuffle.swift          Fisher–Yates, pure and injectable-RNG for testing
 │   ├── MusicLibrary.swift     MediaPlayer reads: playlists, songs, download status
 │   ├── ShuffleService.swift   The single shuffle-and-play path
-│   └── AppSettings.swift      Last playlist + downloaded-only preference
+│   ├── NowPlayingMonitor.swift  Observes the system player for the bottom bar
+│   ├── SampleData.swift       DEBUG-only fixture library for UI work
+│   └── AppSettings.swift      Last playlist, recent shuffles, preferences
+├── Design/
+│   └── Theme.swift            Colour and metric tokens from the design doc
 ├── Views/
-│   └── PlaylistPickerView.swift   The entire UI: one list, one tap
+│   ├── PlaylistPickerView.swift   The entire UI: one list, one tap
+│   └── PlaylistPickerModel.swift  Row/recent/now-playing derivation
 └── Intents/
     ├── PlaylistEntity.swift   Playlists as a Shortcuts entity
     └── ShuffleIntents.swift   The two actions + Siri phrases
 
 scripts/
 ├── resign.sh                  Daily rebuild + wireless reinstall
-└── setup-automation.sh        One-time SleepWatcher and keychain setup
+├── setup-automation.sh        One-time SleepWatcher and keychain setup
+└── make-icon.swift            Renders the app icon at 1024×1024
 ```
 
 ## Development
@@ -218,6 +227,30 @@ xcodebuild test  -scheme TrueShuffle -destination 'platform=iOS Simulator,name=i
 The Xcode project uses file-system-synchronized groups, so new Swift files
 under `TrueShuffle/` are picked up automatically without touching
 `project.pbxproj`.
+
+The simulator has no music library, so every real code path lands in an empty
+state there. To work on the UI without a device, launch with `-sampleData`:
+
+```bash
+xcrun simctl launch booted com.TrueShuffle.samayshah -sampleData
+```
+
+That swaps in a fixture library and seeds the recent row and now-playing bar.
+It is `#if DEBUG` only and cannot reach the Release builds that
+`scripts/resign.sh` installs.
+
+### Design
+
+The interface and icon come from a design doc built in Claude Design. The
+palette is deliberately three values — near-black ink `#15151A`, paper
+`#F4F2ED`, and a single signal red `oklch(0.68 0.17 25)` (`#EF6661`) that only
+ever marks the thing currently playing. Tokens live in
+`TrueShuffle/Design/Theme.swift`.
+
+The app icon is the "Trail" mark: two squares mid-swap, each leaving an echo of
+where it just was, so the tile reads as travel rather than two parked shapes —
+Fisher–Yates' single repeated operation, drawn. It is generated at 1024×1024
+from `scripts/make-icon.swift`.
 
 ### Why the shuffle has its own tests
 
