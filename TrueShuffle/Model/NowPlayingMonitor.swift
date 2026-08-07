@@ -24,6 +24,17 @@ final class NowPlayingMonitor {
     private(set) var playlistID: UInt64?
     private(set) var songCount: Int = 0
 
+    /// Whether *this run of the app* started the current queue.
+    ///
+    /// Load-bearing: `setQueue` and `prepareToPlay` are asynchronous, so for a
+    /// moment after we hand over a queue the player still reports `.stopped`
+    /// with no item — indistinguishable from "nothing is loaded" unless we
+    /// remember that we just asked for playback.
+    private var didStartPlayback = false
+
+    /// Whether the queue we started has actually produced a now-playing item.
+    private var hasLoaded = false
+
     var isActive: Bool { playlistID != nil }
 
     init() {
@@ -73,12 +84,31 @@ final class NowPlayingMonitor {
     }
 
     func refresh() {
-        isPlaying = player.playbackState == .playing
+        // Once an item actually appears, the queue we handed over has finished
+        // loading. That's what separates "still starting" from "now ended" —
+        // both look like `.stopped` with a nil item otherwise.
+        if player.nowPlayingItem != nil { hasLoaded = true }
 
-        // If the queue was emptied or stopped from outside, drop the bar rather
-        // than showing a control that no longer does anything.
-        if player.nowPlayingItem == nil, player.playbackState == .stopped {
+        let isStarting = didStartPlayback && !hasLoaded
+
+        switch player.playbackState {
+        case .playing:
+            isPlaying = true
+        case .paused, .interrupted:
+            isPlaying = false
+        default:
+            // Staying optimistic during the load window avoids a visible
+            // Playing → Paused → Playing flicker on every tap.
+            if !isStarting { isPlaying = false }
+        }
+
+        // Drop the bar only when nothing is loaded and we aren't mid-start.
+        // Without the second condition, the async load window clears the
+        // playlist we just set and the bar never appears at all.
+        if player.nowPlayingItem == nil, !isStarting {
             playlistID = nil
+            didStartPlayback = false
+            hasLoaded = false
         }
     }
 
@@ -87,6 +117,8 @@ final class NowPlayingMonitor {
     func adopt(playlistID: UInt64, songCount: Int) {
         self.playlistID = playlistID
         self.songCount = songCount
+        didStartPlayback = true
+        hasLoaded = false
         isPlaying = true
     }
 
