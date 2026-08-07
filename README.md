@@ -63,6 +63,9 @@ ruled out:
 
 ## Getting started
 
+Budget about 20 minutes. Steps 1–3 are one-time; after that installs are a
+single command over Wi-Fi.
+
 ### 1. Sign the app
 
 ```bash
@@ -73,28 +76,77 @@ open TrueShuffle.xcodeproj
 
 In Xcode:
 
-1. **Settings → Accounts** → add your Apple ID (this creates a "Personal Team").
-2. Select the **TrueShuffle** target → **Signing & Capabilities**.
-3. Set **Team** to your Personal Team.
-4. Change the **Bundle Identifier** to something unique to you, e.g.
-   `com.yourname.TrueShuffle`.
+1. **Settings** (`⌘,`) **→ Accounts → +** → **Apple ID** → sign in. This creates
+   a free "Personal Team".
+2. Click the blue **TrueShuffle** project icon in the sidebar → under TARGETS
+   select **TrueShuffle** → **Signing & Capabilities**.
+3. Tick **Automatically manage signing**, then set **Team** to your Personal Team.
+4. Change the **Bundle Identifier** to something globally unique, e.g.
+   `com.yourname.TrueShuffle`. If Xcode says the identifier is unavailable, pick
+   a different one — someone else has claimed it.
 
-### 2. Install it on your phone
+> [!NOTE]
+> Until an iPhone is plugged in, this screen shows **"Communication with Apple
+> failed — your team has no devices"** and **"No profiles were found"**. That is
+> expected, not a misconfiguration: a free Personal Team cannot mint a
+> provisioning profile until at least one real device is registered to it. It
+> clears in step 3.
 
-Connect the iPhone by cable once, pick it as the run destination, and press
-**Run** (`⌘R`). On the phone, approve the developer certificate under
-**Settings → General → VPN & Device Management**.
+### 2. Enable Developer Mode on the iPhone
 
-To go wireless for every future install: **Window → Devices and Simulators**
-(`⇧⌘2`) → select the iPhone → check **Connect via Network**. The cable is no
-longer needed as long as both devices share a Wi-Fi network.
+iOS will not run a development-signed app until Developer Mode is on. This is
+the step most likely to trip you up, because the app installs fine without it
+and then simply refuses to launch.
+
+1. Connect the iPhone by USB and unlock it → tap **Trust This Computer**.
+2. On the iPhone: **Settings → Privacy & Security** → scroll to the bottom →
+   **Developer Mode** → toggle **on**.
+3. Tap **Restart**. After the reboot, unlock and confirm with **Turn On**.
+
+Confirm the Mac sees it properly:
+
+```bash
+xcrun devicectl list devices
+```
+
+The **State** column must read `connected`. If it reads `connected (no DDI)`,
+Developer Mode is still off — the developer disk image can't mount without it.
+
+> [!TIP]
+> If **Developer Mode** doesn't appear in Settings, leave the phone plugged in
+> and press `⌘R` in Xcode once. The failed attempt makes the menu appear.
+
+### 3. Install it
+
+With the phone connected, the quickest route is the same script that later runs
+unattended — this installs the app *and* proves the automation works:
+
+```bash
+./scripts/resign.sh --list        # copy your iPhone's identifier
+cp scripts/resign.config.example scripts/resign.config
+# paste the identifier into DEVICE_ID
+./scripts/resign.sh --force
+```
+
+A successful run ends with `SUCCESS: reinstalled TrueShuffle`. (Pressing `⌘R` in
+Xcode works too, with the iPhone selected as the destination under "Devices".)
+
+Then on the iPhone, approve the certificate:
+**Settings → General → VPN & Device Management** → tap your Apple ID → **Trust**.
+
+Open the app and tap **Allow** when it asks for media library access.
 
 > [!IMPORTANT]
-> On first launch the app asks for media library access. Denying it leaves the
-> app with nothing to read — you can re-enable it under
-> **Settings → Privacy & Security → Media & Apple Music**.
+> Denying media library access leaves the app with nothing to read. Re-enable it
+> under **Settings → Privacy & Security → Media & Apple Music → True Shuffle**.
 
-### 3. Keep it installed
+### 4. Go wireless
+
+**Window → Devices and Simulators** (`⇧⌘2`) → select the iPhone → tick
+**Connect via Network**. Wait for the 🌐 icon, then unplug. Every future install
+happens over Wi-Fi as long as both devices are on the same network.
+
+### 5. Keep it installed
 
 Free signing certificates expire after **7 days**, after which the app stops
 opening. No tool removes that limit, but it can be fully automated:
@@ -107,12 +159,6 @@ This installs [SleepWatcher](https://www.bernhard-baehr.de/), points `~/.wakeup`
 at `scripts/resign.sh`, and unlocks the codesigning key for non-interactive use.
 The first time you open your Mac each day, the app is rebuilt and reinstalled
 over Wi-Fi.
-
-Verify it end to end before trusting it:
-
-```bash
-./scripts/resign.sh --force
-```
 
 > [!WARNING]
 > The keychain step in `setup-automation.sh` is mandatory, not optional. Without
@@ -185,6 +231,19 @@ Sattolo's algorithm, which never leaves anything put), and that positions are
 occupied uniformly across 30,000 trials.
 
 ## Troubleshooting
+
+**Xcode: "Communication with Apple failed — your team has no devices."**
+Expected before any iPhone has been connected. A free Personal Team can't
+generate a provisioning profile until a real device is registered to it. Plug
+the phone in, then click **Try Again** on that Status row.
+
+**`devicectl` shows `connected (no DDI)`.**
+Developer Mode is off on the phone. See step 2 — the developer disk image can't
+mount without it, and the app will install but refuse to launch.
+
+**The app installs but won't launch, or shows "Untrusted Developer."**
+Approve the certificate: **Settings → General → VPN & Device Management** → tap
+your Apple ID → **Trust**.
 
 **The app won't open and shows "Unable to Verify App."**
 The 7-day certificate expired. Run `./scripts/resign.sh --force`, or check
