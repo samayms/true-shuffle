@@ -201,6 +201,20 @@ over Wi-Fi.
 > password prompt that nobody is awake to answer, and the automation hangs
 > silently until you notice the app has stopped opening.
 
+> [!NOTE]
+> macOS will ask whether **sleepwatcher** may *"receive keystrokes from any
+> application"*. **Deny it.** SleepWatcher requests Input Monitoring only
+> because it *can* watch for user inactivity — its `-t`/`-i`/`-R` idle options,
+> and `-b`/`-r`/`-g`. This setup uses none of them:
+>
+> ```
+> sleepwatcher -V -s ~/.sleep -w ~/.wakeup
+> ```
+>
+> Sleep and wake are power-management events, so `-s` and `-w` work with the
+> permission denied. Granting it would give a background daemon keylogger-level
+> access for no benefit.
+
 Verify it end to end before trusting it. The script skips if it already ran
 today, so force a run:
 
@@ -218,6 +232,23 @@ signing actually produced with:
 security cms -D -i <path>/TrueShuffle.app/PlugIns/TrueShuffleWidgetExtension.appex/embedded.mobileprovision \
   | plutil -p - | grep ExpirationDate
 ```
+
+#### Testing the wake trigger itself
+
+`resign.sh --force` proves the *build and install* work. It does not prove that
+waking the Mac actually fires them. To test that, clear the day marker first —
+otherwise the once-a-day guard makes the run exit silently and you learn
+nothing:
+
+```bash
+rm ~/.local/state/true-shuffle/last-resign
+pmset sleepnow
+# wake the Mac, wait a minute, then:
+tail ~/.local/state/true-shuffle/resign.log
+```
+
+A fresh `starting re-sign for device …` line timestamped after the wake means
+the whole chain works: SleepWatcher → `~/.wakeup` → `resign.sh`.
 
 #### Where this still breaks
 
