@@ -20,6 +20,9 @@ keys, and no `$99/year` Apple Developer Program.
 - **Uniform shuffle.** Fisher–Yates with a cryptographic RNG, covered by tests
   that check positional uniformity and full permutation coverage — not just
   "it looks random."
+- **Your whole library, too.** "All Songs" sits at the top of the list and
+  shuffles everything you own, not just a playlist. It behaves like any other
+  entry — pin it to a widget slot, hand it to Siri, reshuffle it from the bar.
 - **One screen.** A dark, system-native list: pick a playlist, it shuffles.
   Recently shuffled playlists sit at the top, and a compact now-playing bar
   gives you play/pause and a one-tap reshuffle.
@@ -28,12 +31,11 @@ keys, and no `$99/year` Apple Developer Program.
   normally. This app implements none of them and doesn't need to.
 - **Knows what's downloaded.** Optionally shuffles only songs stored on the
   device, so a shuffle on a plane or the subway never hits a song it can't play.
-- **Built for Shortcuts.** Two actions, both of which run without opening the
+- **Built for Shortcuts.** Three actions, all of which run without opening the
   app — the intended everyday path is one tap from the home screen or the
   Action Button.
-- **Home Screen widget.** Three sizes showing one, three, or six playlists.
-  Every row is a button that shuffles and plays on the spot, with no app
-  launch at all.
+- **Home Screen widget.** Three sizes, showing three or six entries. Every row
+  is a button that shuffles and plays on the spot, with no app launch at all.
 - **Stays installed.** Free provisioning expires every 7 days; an included
   script re-signs the app over Wi-Fi when you open your Mac.
 
@@ -283,13 +285,14 @@ won't find out until the app refuses to open:
 
 ## Using it from Shortcuts
 
-The app registers two actions, both with `openAppWhenRun = false` — they start
+The app registers three actions, all with `openAppWhenRun = false` — they start
 music without ever bringing True Shuffle to the foreground.
 
 | Action | Parameters | Use it for |
 |---|---|---|
 | **Shuffle Last Playlist** | none | The everyday one-tap case: home screen icon, Action Button, or a Back Tap |
 | **Shuffle Playlist** | playlist, downloaded-only | Picking a specific playlist, or per-playlist shortcuts |
+| **Shuffle All Songs** | downloaded-only | The whole library in one tap, with nothing to choose |
 
 To put it on your home screen: **Shortcuts → +** → add **Shuffle Last Playlist**
 → share sheet → **Add to Home Screen**. Tapping it shuffles and plays with no

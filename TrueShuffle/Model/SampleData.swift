@@ -15,6 +15,8 @@ enum SampleData {
     }
 
     static let playlists: [Playlist] = [
+        Playlist(id: Playlist.entireLibraryID, name: "All Songs", songCount: 2165,
+                 downloadedCount: 1204, lastPlayedDate: nil),
         Playlist(id: 1, name: "Late Nights", songCount: 214, downloadedCount: 198,
                  lastPlayedDate: Date().addingTimeInterval(-2 * 3600)),
         Playlist(id: 2, name: "Long Run", songCount: 96, downloadedCount: 96,

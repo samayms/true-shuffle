@@ -57,7 +57,8 @@ extension ShuffleEntry {
             WidgetPlaylist(id: 2, name: "Long Run", songCount: 96, lastPlayedDescription: "Sunday"),
             WidgetPlaylist(id: 3, name: "Kitchen Radio", songCount: 431, lastPlayedDescription: nil),
             WidgetPlaylist(id: 5, name: "1996", songCount: 62, lastPlayedDescription: nil),
-            WidgetPlaylist(id: 6, name: "Everything I Liked", songCount: 1204, lastPlayedDescription: nil)
+            WidgetPlaylist(id: Playlist.entireLibraryID, name: "All Songs", songCount: 2165,
+                           lastPlayedDescription: nil)
         ])
     )
 }

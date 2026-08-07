@@ -137,7 +137,9 @@ struct PlaylistPickerView: View {
                     .padding(.horizontal, Theme.horizontalPadding)
                 }
 
-                Text("All playlists").sectionHeader()
+                // Not "All playlists" any more: the group now leads with the
+                // whole library, which isn't one.
+                Text("Your music").sectionHeader()
 
                 if model.visible.isEmpty {
                     Text("Nothing downloaded yet. Turn the filter off to shuffle from your whole library.")

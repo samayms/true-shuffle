@@ -26,6 +26,21 @@ struct Playlist: Identifiable, Hashable, Sendable {
     let lastPlayedDate: Date?
 
     var hasDownloads: Bool { downloadedCount > 0 }
+
+    /// Reserved id for "every song in the library", which is not a playlist but
+    /// is offered alongside them.
+    ///
+    /// Modelling it as a `Playlist` rather than as a separate concept is what
+    /// keeps it working everywhere for free — the picker, the widget rows, the
+    /// Edit Widget slots, the Shortcuts entity, the recents list and the
+    /// now-playing bar all key off `Playlist`, and none of them need to know
+    /// this one isn't real.
+    ///
+    /// Zero is safe as a sentinel: `MPMediaEntityPersistentID` is a hash and
+    /// the framework uses 0 to mean "unknown", so no actual playlist carries it.
+    static let entireLibraryID: UInt64 = 0
+
+    var isEntireLibrary: Bool { id == Self.entireLibraryID }
 }
 
 enum MusicLibraryError: LocalizedError {
@@ -87,16 +102,50 @@ enum MusicLibrary {
         let query = MPMediaQuery.playlists()
         let collections = query.collections ?? []
 
-        return collections
+        let named = collections
             .compactMap { $0 as? MPMediaPlaylist }
             .compactMap(summarize)
             .filter { $0.songCount > 0 }
             .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
+
+        // Pinned to the front rather than sorted in among the "A"s: it isn't a
+        // playlist, and it's the one entry that is always available.
+        guard let everything = entireLibrary() else { return named }
+        return [everything] + named
+    }
+
+    /// Every song in the library, summarised as if it were a playlist.
+    ///
+    /// `lastPlayedDate` is deliberately left nil. It would otherwise be the most
+    /// recent play of *any* song, which is by definition never older than any
+    /// real playlist's — so on the widget, which orders rows by recency, this
+    /// would permanently pin itself to the top and push the actual playlists
+    /// down. Leaving it nil lets it rank on the user's own shuffle history
+    /// instead, which is the thing they actually care about.
+    static func entireLibrary() -> Playlist? {
+        let items = allSongs()
+        guard !items.isEmpty else { return nil }
+
+        return Playlist(
+            id: Playlist.entireLibraryID,
+            name: "All Songs",
+            songCount: items.count,
+            downloadedCount: items.count(where: isDownloaded),
+            lastPlayedDate: nil
+        )
     }
 
     /// Looks up a single playlist by persistent ID.
     static func playlist(id: UInt64) throws -> Playlist {
         guard isAuthorized else { throw MusicLibraryError.notAuthorized }
+
+        if id == Playlist.entireLibraryID {
+            guard let everything = entireLibrary() else {
+                throw MusicLibraryError.playlistNotFound
+            }
+            return everything
+        }
+
         guard let match = rawPlaylist(id: id), let summary = summarize(match) else {
             throw MusicLibraryError.playlistNotFound
         }
@@ -106,12 +155,21 @@ enum MusicLibrary {
     /// The songs to actually enqueue, in library order (the caller shuffles).
     static func songs(inPlaylist id: UInt64, downloadedOnly: Bool) throws -> [MPMediaItem] {
         guard isAuthorized else { throw MusicLibraryError.notAuthorized }
-        guard let playlist = rawPlaylist(id: id) else {
-            throw MusicLibraryError.playlistNotFound
+
+        let name: String
+        let all: [MPMediaItem]
+
+        if id == Playlist.entireLibraryID {
+            name = "All Songs"
+            all = allSongs()
+        } else {
+            guard let playlist = rawPlaylist(id: id) else {
+                throw MusicLibraryError.playlistNotFound
+            }
+            name = playlist.name ?? "Playlist"
+            all = playlist.items
         }
 
-        let name = playlist.name ?? "Playlist"
-        let all = playlist.items
         guard !all.isEmpty else { throw MusicLibraryError.noSongs(playlistName: name) }
 
         guard downloadedOnly else { return all }
@@ -124,6 +182,14 @@ enum MusicLibrary {
     }
 
     // MARK: - Internals
+
+    /// Every song in the library.
+    ///
+    /// `MPMediaQuery.songs()` is already scoped to music, so podcasts,
+    /// audiobooks and voice memos don't leak into a shuffle.
+    private static func allSongs() -> [MPMediaItem] {
+        MPMediaQuery.songs().items ?? []
+    }
 
     private static func rawPlaylist(id: UInt64) -> MPMediaPlaylist? {
         let query = MPMediaQuery.playlists()

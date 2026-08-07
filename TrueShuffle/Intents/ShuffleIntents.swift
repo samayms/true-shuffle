@@ -65,6 +65,33 @@ struct ShuffleLastPlaylistIntent: AudioPlaybackIntent {
     }
 }
 
+/// Shuffle the entire library, with no parameters.
+///
+/// `ShufflePlaylistIntent` can already reach this — "All Songs" appears in its
+/// picker like any other entry — but that requires choosing it. This exists so
+/// the whole library is a one-tap target of its own, the same way
+/// `ShuffleLastPlaylistIntent` is.
+struct ShuffleEntireLibraryIntent: AudioPlaybackIntent {
+    static var title: LocalizedStringResource = "Shuffle All Songs"
+    static var description = IntentDescription(
+        "Shuffles every song in your library into a genuinely random order and plays it."
+    )
+    static var openAppWhenRun = false
+
+    @Parameter(title: "Downloaded Only", default: false)
+    var downloadedOnly: Bool
+
+    @MainActor
+    func perform() async throws -> some IntentResult & ProvidesDialog {
+        let outcome = try await ShuffleService.shuffleAndPlay(
+            playlistID: Playlist.entireLibraryID,
+            downloadedOnly: downloadedOnly
+        )
+
+        return .result(dialog: IntentDialog(outcome.spokenSummary))
+    }
+}
+
 enum ShuffleIntentError: LocalizedError {
     case noPreviousPlaylist
 
@@ -103,6 +130,15 @@ struct TrueShuffleShortcuts: AppShortcutsProvider {
             ],
             shortTitle: "Shuffle Playlist",
             systemImageName: "music.note.list"
+        )
+        AppShortcut(
+            intent: ShuffleEntireLibraryIntent(),
+            phrases: [
+                "Shuffle all songs with \(.applicationName)",
+                "Shuffle my library with \(.applicationName)"
+            ],
+            shortTitle: "Shuffle All Songs",
+            systemImageName: "music.note"
         )
     }
 }
