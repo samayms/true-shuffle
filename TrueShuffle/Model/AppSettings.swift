@@ -5,12 +5,17 @@ struct RecentShuffle: Codable, Hashable, Sendable {
     let playlistID: UInt64
     let date: Date
 
+    var relativeDescription: String { date.relativeDescription }
+}
+
+extension Date {
     /// "Just now", "2 hours ago", "Yesterday", "Sunday", or a date.
     ///
     /// Hand-rolled rather than `RelativeDateTimeFormatter` because the design
     /// calls for a weekday name in the 2–7 day range, which the system
     /// formatter renders as "6 days ago".
     var relativeDescription: String {
+        let date = self
         let calendar = Calendar.current
         let now = Date()
         let elapsed = now.timeIntervalSince(date)

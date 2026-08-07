@@ -45,13 +45,29 @@ struct PlaylistEntityQuery: EntityQuery {
 
     @MainActor
     func suggestedEntities() async throws -> [PlaylistEntity] {
-        try MusicLibrary.playlists().map(PlaylistEntity.init)
+        available()
     }
 }
 
 extension PlaylistEntityQuery: EnumerableEntityQuery {
     @MainActor
     func allEntities() async throws -> [PlaylistEntity] {
-        try MusicLibrary.playlists().map(PlaylistEntity.init)
+        available()
+    }
+}
+
+private extension PlaylistEntityQuery {
+    /// Deliberately swallows a failed library read.
+    ///
+    /// Both hosts of this picker — the Shortcuts editor and the widget's "Edit
+    /// Widget" sheet — render a thrown error as a jarring failure alert over
+    /// what is otherwise a list of choices. An empty list says the same thing
+    /// more calmly, and the app's own screen already explains how to grant
+    /// access. This matters most in the widget extension, which cannot present
+    /// the authorization prompt itself.
+    @MainActor
+    func available() -> [PlaylistEntity] {
+        guard let playlists = try? MusicLibrary.playlists() else { return [] }
+        return playlists.map(PlaylistEntity.init)
     }
 }

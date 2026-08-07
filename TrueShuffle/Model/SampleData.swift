@@ -15,12 +15,18 @@ enum SampleData {
     }
 
     static let playlists: [Playlist] = [
-        Playlist(id: 1, name: "Late Nights", songCount: 214, downloadedCount: 198),
-        Playlist(id: 2, name: "Long Run", songCount: 96, downloadedCount: 96),
-        Playlist(id: 3, name: "Kitchen Radio", songCount: 431, downloadedCount: 112),
-        Playlist(id: 4, name: "Ambient / Work", songCount: 158, downloadedCount: 158),
-        Playlist(id: 5, name: "1996", songCount: 62, downloadedCount: 0),
-        Playlist(id: 6, name: "Everything I Liked", songCount: 1204, downloadedCount: 640)
+        Playlist(id: 1, name: "Late Nights", songCount: 214, downloadedCount: 198,
+                 lastPlayedDate: Date().addingTimeInterval(-2 * 3600)),
+        Playlist(id: 2, name: "Long Run", songCount: 96, downloadedCount: 96,
+                 lastPlayedDate: Date().addingTimeInterval(-4 * 24 * 3600)),
+        Playlist(id: 3, name: "Kitchen Radio", songCount: 431, downloadedCount: 112,
+                 lastPlayedDate: nil),
+        Playlist(id: 4, name: "Ambient / Work", songCount: 158, downloadedCount: 158,
+                 lastPlayedDate: Date().addingTimeInterval(-26 * 3600)),
+        Playlist(id: 5, name: "1996", songCount: 62, downloadedCount: 0,
+                 lastPlayedDate: nil),
+        Playlist(id: 6, name: "Everything I Liked", songCount: 1204, downloadedCount: 640,
+                 lastPlayedDate: nil)
     ]
 
     /// Seeds the recent row and the now-playing bar so both are visible.

@@ -16,6 +16,14 @@ struct Playlist: Identifiable, Hashable, Sendable {
     let songCount: Int
     /// Songs actually downloaded to this device (i.e. playable with no network).
     let downloadedCount: Int
+    /// The most recent time any song in this playlist was played, from the
+    /// library itself rather than from this app's own history.
+    ///
+    /// This exists for the widget. The widget extension is a separate process
+    /// and this account can't use App Groups, so it cannot see the app's
+    /// `recentShuffles`. The music library, though, *is* shared between the two
+    /// — which makes this the only recency signal both processes can agree on.
+    let lastPlayedDate: Date?
 
     var hasDownloads: Bool { downloadedCount > 0 }
 }
@@ -138,7 +146,8 @@ enum MusicLibrary {
             id: playlist.persistentID,
             name: name,
             songCount: items.count,
-            downloadedCount: items.count(where: isDownloaded)
+            downloadedCount: items.count(where: isDownloaded),
+            lastPlayedDate: items.compactMap(\.lastPlayedDate).max()
         )
     }
 

@@ -1,5 +1,6 @@
 import Foundation
 import MediaPlayer
+import WidgetKit
 
 /// What a completed shuffle did, so the caller can report it.
 struct ShuffleOutcome: Sendable {
@@ -25,6 +26,11 @@ enum ShuffleService {
         try play(shuffled)
 
         AppSettings.recordShuffle(playlistID: playlistID, songCount: shuffled.count)
+
+        // The widget orders its rows by recency, so every shuffle — from the
+        // app, from Shortcuts, or from the widget's own button — invalidates
+        // what it is showing.
+        WidgetCenter.shared.reloadAllTimelines()
 
         return ShuffleOutcome(
             playlistID: playlistID,
