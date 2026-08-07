@@ -18,12 +18,12 @@ struct ShuffleOutcome: Sendable {
 enum ShuffleService {
 
     @discardableResult
-    static func shuffleAndPlay(playlistID: UInt64, downloadedOnly: Bool) throws -> ShuffleOutcome {
+    static func shuffleAndPlay(playlistID: UInt64, downloadedOnly: Bool) async throws -> ShuffleOutcome {
         let playlist = try MusicLibrary.playlist(id: playlistID)
         let songs = try MusicLibrary.songs(inPlaylist: playlistID, downloadedOnly: downloadedOnly)
 
         let shuffled = Shuffle.fisherYates(songs)
-        try play(shuffled)
+        await play(shuffled)
 
         AppSettings.recordShuffle(playlistID: playlistID, songCount: shuffled.count)
 
@@ -45,7 +45,7 @@ enum ShuffleService {
     /// Playback deliberately happens in the Music app rather than in-process:
     /// that is what makes lock screen, Control Center, CarPlay, AirPlay and
     /// background audio all work without this app implementing any of them.
-    private static func play(_ songs: [MPMediaItem]) throws {
+    private static func play(_ songs: [MPMediaItem]) async {
         let player = MPMusicPlayerController.systemMusicPlayer
 
         // This is the load-bearing line, and it is easy to miss.
@@ -59,19 +59,53 @@ enum ShuffleService {
         player.repeatMode = .none
 
         player.setQueue(with: MPMediaItemCollection(items: songs))
+        await queueDidLoad(player)
+        player.play()
+    }
 
-        // `setQueue` is asynchronous internally. Calling `play()` immediately
-        // can race the queue actually being loaded and start the *previous*
-        // queue instead; `prepareToPlay` is the documented way to wait.
-        player.prepareToPlay { error in
-            Task { @MainActor in
-                if let error {
-                    // Nothing actionable to surface from here, but a silent
-                    // no-op would be worse than a logged failure.
-                    print("True Shuffle: prepareToPlay failed — \(error.localizedDescription)")
+    /// Waits for `setQueue` to take effect, then lets the caller start playback.
+    ///
+    /// `setQueue` is asynchronous internally, so calling `play()` immediately
+    /// can start the *previous* queue instead. `prepareToPlay` is the
+    /// documented way to wait — but calling `play()` from inside its completion
+    /// handler, as this once did, breaks the widget outright: the intent's
+    /// `perform()` returns as soon as the handler is registered, the extension
+    /// process is torn down, and the completion never runs. The queue ends up
+    /// loaded and silent, which is exactly the reported symptom.
+    ///
+    /// Awaiting instead keeps the process alive until the queue is ready. The
+    /// deadline matters for the same reason: a completion that never arrives
+    /// must cost a short pause, not silence.
+    private static func queueDidLoad(_ player: MPMusicPlayerController) async {
+        let gate = ResumeGate()
+
+        await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+            player.prepareToPlay { error in
+                Task { @MainActor in
+                    if let error {
+                        print("True Shuffle: prepareToPlay failed — \(error.localizedDescription)")
+                    }
+                    if gate.claim() { continuation.resume() }
                 }
-                player.play()
+            }
+
+            Task { @MainActor in
+                try? await Task.sleep(for: .milliseconds(1500))
+                if gate.claim() { continuation.resume() }
             }
         }
+    }
+}
+
+/// Lets two racing paths share one continuation without resuming it twice,
+/// which would trap.
+@MainActor
+private final class ResumeGate {
+    private var hasResumed = false
+
+    func claim() -> Bool {
+        guard !hasResumed else { return false }
+        hasResumed = true
+        return true
     }
 }

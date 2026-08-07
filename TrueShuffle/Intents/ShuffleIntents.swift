@@ -31,7 +31,7 @@ struct ShufflePlaylistIntent: AudioPlaybackIntent {
             throw MusicLibraryError.playlistNotFound
         }
 
-        let outcome = try ShuffleService.shuffleAndPlay(
+        let outcome = try await ShuffleService.shuffleAndPlay(
             playlistID: id,
             downloadedOnly: downloadedOnly
         )
@@ -56,7 +56,7 @@ struct ShuffleLastPlaylistIntent: AudioPlaybackIntent {
             throw ShuffleIntentError.noPreviousPlaylist
         }
 
-        let outcome = try ShuffleService.shuffleAndPlay(
+        let outcome = try await ShuffleService.shuffleAndPlay(
             playlistID: id,
             downloadedOnly: AppSettings.downloadedOnly
         )

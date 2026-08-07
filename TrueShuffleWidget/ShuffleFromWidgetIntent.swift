@@ -42,7 +42,7 @@ struct ShuffleFromWidgetIntent: AudioPlaybackIntent {
 
         // `ShuffleService` also records the shuffle and reloads the timeline, so
         // the row that was tapped moves to the top the way the design shows.
-        try ShuffleService.shuffleAndPlay(
+        try await ShuffleService.shuffleAndPlay(
             playlistID: id,
             downloadedOnly: AppSettings.downloadedOnly
         )

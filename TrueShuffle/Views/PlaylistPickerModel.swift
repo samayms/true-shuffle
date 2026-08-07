@@ -141,15 +141,27 @@ final class PlaylistPickerModel {
     // MARK: - Actions
 
     func shuffle(_ playlist: Playlist) {
-        do {
-            let outcome = try ShuffleService.shuffleAndPlay(
-                playlistID: playlist.id,
-                downloadedOnly: downloadedOnly
-            )
-            nowPlaying.adopt(playlistID: outcome.playlistID, songCount: outcome.songCount)
-        } catch {
-            errorMessage = error.localizedDescription
-            isShowingError = true
+        #if DEBUG
+        if SampleData.isEnabled {
+            // No real library to shuffle; still drive the same UI state so the
+            // now-playing bar and row indicator can be verified.
+            nowPlaying.adopt(playlistID: playlist.id, songCount: playlist.songCount)
+            AppSettings.recordShuffle(playlistID: playlist.id, songCount: playlist.songCount)
+            return
+        }
+        #endif
+
+        Task {
+            do {
+                let outcome = try await ShuffleService.shuffleAndPlay(
+                    playlistID: playlist.id,
+                    downloadedOnly: downloadedOnly
+                )
+                nowPlaying.adopt(playlistID: outcome.playlistID, songCount: outcome.songCount)
+            } catch {
+                errorMessage = error.localizedDescription
+                isShowingError = true
+            }
         }
     }
 
