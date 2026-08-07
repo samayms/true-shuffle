@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		AA0000000000000000000080 /* TrueShuffleWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000022 /* TrueShuffleWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		AA0000000000000000000071 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -14,22 +18,78 @@
 			remoteGlobalIDString = AA0000000000000000000010;
 			remoteInfo = TrueShuffle;
 		};
+		AA0000000000000000000073 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = AA0000000000000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AA0000000000000000000012;
+			remoteInfo = TrueShuffleWidgetExtension;
+		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		AA0000000000000000000038 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				AA0000000000000000000080 /* TrueShuffleWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		AA0000000000000000000020 /* TrueShuffle.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TrueShuffle.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA0000000000000000000021 /* TrueShuffleTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TrueShuffleTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		AA0000000000000000000022 /* TrueShuffleWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = TrueShuffleWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		AA0000000000000000000090 /* Exceptions for "TrueShuffle" folder in "TrueShuffleWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Assets.xcassets,
+				Intents/ShuffleIntents.swift,
+				Model/NowPlayingMonitor.swift,
+				Model/SampleData.swift,
+				TrueShuffleApp.swift,
+				Views/PlaylistPickerModel.swift,
+				Views/PlaylistPickerView.swift,
+			);
+			target = AA0000000000000000000012 /* TrueShuffleWidgetExtension */;
+		};
+		AA0000000000000000000091 /* Exceptions for "TrueShuffleWidget" folder in "TrueShuffleWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = AA0000000000000000000012 /* TrueShuffleWidgetExtension */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		AA0000000000000000000040 /* TrueShuffle */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				AA0000000000000000000090 /* Exceptions for "TrueShuffle" folder in "TrueShuffleWidgetExtension" target */,
+			);
 			path = TrueShuffle;
 			sourceTree = "<group>";
 		};
 		AA0000000000000000000041 /* TrueShuffleTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = TrueShuffleTests;
+			sourceTree = "<group>";
+		};
+		AA0000000000000000000042 /* TrueShuffleWidget */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				AA0000000000000000000091 /* Exceptions for "TrueShuffleWidget" folder in "TrueShuffleWidgetExtension" target */,
+			);
+			path = TrueShuffleWidget;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -49,6 +109,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		AA0000000000000000000036 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -56,6 +123,7 @@
 			isa = PBXGroup;
 			children = (
 				AA0000000000000000000040 /* TrueShuffle */,
+				AA0000000000000000000042 /* TrueShuffleWidget */,
 				AA0000000000000000000041 /* TrueShuffleTests */,
 				AA0000000000000000000003 /* Products */,
 			);
@@ -66,6 +134,7 @@
 			children = (
 				AA0000000000000000000020 /* TrueShuffle.app */,
 				AA0000000000000000000021 /* TrueShuffleTests.xctest */,
+				AA0000000000000000000022 /* TrueShuffleWidgetExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -80,10 +149,12 @@
 				AA0000000000000000000030 /* Sources */,
 				AA0000000000000000000031 /* Frameworks */,
 				AA0000000000000000000032 /* Resources */,
+				AA0000000000000000000038 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				AA0000000000000000000072 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				AA0000000000000000000040 /* TrueShuffle */,
@@ -113,6 +184,27 @@
 			productReference = AA0000000000000000000021 /* TrueShuffleTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
+		AA0000000000000000000012 /* TrueShuffleWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AA0000000000000000000053 /* Build configuration list for PBXNativeTarget "TrueShuffleWidgetExtension" */;
+			buildPhases = (
+				AA0000000000000000000035 /* Sources */,
+				AA0000000000000000000036 /* Frameworks */,
+				AA0000000000000000000037 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				AA0000000000000000000042 /* TrueShuffleWidget */,
+				AA0000000000000000000040 /* TrueShuffle */,
+			);
+			name = TrueShuffleWidgetExtension;
+			productName = TrueShuffleWidgetExtension;
+			productReference = AA0000000000000000000022 /* TrueShuffleWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -129,6 +221,9 @@
 					AA0000000000000000000011 = {
 						CreatedOnToolsVersion = 26.6;
 						TestTargetID = AA0000000000000000000010;
+					};
+					AA0000000000000000000012 = {
+						CreatedOnToolsVersion = 26.6;
 					};
 				};
 			};
@@ -148,12 +243,20 @@
 			targets = (
 				AA0000000000000000000010 /* TrueShuffle */,
 				AA0000000000000000000011 /* TrueShuffleTests */,
+				AA0000000000000000000012 /* TrueShuffleWidgetExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		AA0000000000000000000032 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AA0000000000000000000037 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -177,6 +280,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		AA0000000000000000000035 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -184,6 +294,11 @@
 			isa = PBXTargetDependency;
 			target = AA0000000000000000000010 /* TrueShuffle */;
 			targetProxy = AA0000000000000000000071 /* PBXContainerItemProxy */;
+		};
+		AA0000000000000000000072 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = AA0000000000000000000012 /* TrueShuffleWidgetExtension */;
+			targetProxy = AA0000000000000000000073 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -335,6 +450,54 @@
 			};
 			name = Release;
 		};
+		AA0000000000000000000066 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = MST92UMRY3;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = TrueShuffleWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "True Shuffle";
+				INFOPLIST_KEY_NSAppleMusicUsageDescription = "True Shuffle reads your playlists so it can build a genuinely random shuffle order and hand it to the Music app.";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.TrueShuffle.samayshah.Widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		AA0000000000000000000067 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = MST92UMRY3;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = TrueShuffleWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "True Shuffle";
+				INFOPLIST_KEY_NSAppleMusicUsageDescription = "True Shuffle reads your playlists so it can build a genuinely random shuffle order and hand it to the Music app.";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.TrueShuffle.samayshah.Widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -361,6 +524,15 @@
 			buildConfigurations = (
 				AA0000000000000000000064 /* Debug */,
 				AA0000000000000000000065 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		AA0000000000000000000053 /* Build configuration list for PBXNativeTarget "TrueShuffleWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AA0000000000000000000066 /* Debug */,
+				AA0000000000000000000067 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
