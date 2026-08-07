@@ -142,14 +142,19 @@ enum MusicLibrary {
         )
     }
 
-    /// Whether a song is playable from local storage with no network.
+    /// Whether a song is stored on this device and playable with no network,
+    /// no matter where it came from — an Apple Music download, an iTunes
+    /// purchase, or a file you imported yourself.
     ///
-    /// `isCloudItem` is true for anything backed by Apple Music's catalog rather
-    /// than local storage. `assetURL` is nil when there is no locally readable
-    /// asset at all. Requiring both is stricter than either alone and matches
-    /// what the user means by "downloaded" — this local-only signal is precisely
-    /// what web/MusicKit approaches cannot see, and the reason this app is native.
+    /// Deliberately *not* `assetURL != nil`. `assetURL` is nil for any
+    /// DRM-protected item, and every Apple Music track is DRM-protected whether
+    /// or not it has been downloaded — so testing it would silently exclude the
+    /// entire Apple Music library and leave only DRM-free files.
+    ///
+    /// `isCloudItem` is the only public signal that distinguishes "in your cloud
+    /// library" from "on this device," and it is source-agnostic, which is
+    /// exactly the question being asked here.
     private static func isDownloaded(_ item: MPMediaItem) -> Bool {
-        !item.isCloudItem && item.assetURL != nil
+        !item.isCloudItem
     }
 }
