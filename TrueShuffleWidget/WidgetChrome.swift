@@ -45,6 +45,15 @@ struct PlayBadge: View {
         let triangleWidth: CGFloat
         let triangleHeight: CGFloat
 
+        /// How far right of the circle's geometric centre the triangle sits.
+        ///
+        /// Half the centroid correction, arrived at by bracketing. A triangle's
+        /// centre of mass sits a third of the way from base to apex, so fully
+        /// correcting for it means shifting by `w/2 - w/3 = w/6` — but on device
+        /// that reads as clearly right of centre, and no correction at all reads
+        /// as left of centre. Half of it is what actually looks centred.
+        var opticalOffset: CGFloat { triangleWidth / 12 }
+
         /// The small widget's badge.
         static let compact = Metrics(diameter: 22, triangleWidth: 7, triangleHeight: 9)
         /// Medium and large widgets.
@@ -56,16 +65,10 @@ struct PlayBadge: View {
     var body: some View {
         ZStack {
             Circle().fill(Theme.signal)
-            // Centred on its bounding box, with no optical nudge to the right.
-            //
-            // Both the design's `margin-left` and the usual centroid correction
-            // push the triangle right, and both were tried; on the device each
-            // read as visibly off-centre. At these diameters the circle is small
-            // enough that any rightward shift is more obvious than the
-            // centre-of-mass imbalance it is meant to correct.
             PlayTriangle()
                 .fill(.white)
                 .frame(width: metrics.triangleWidth, height: metrics.triangleHeight)
+                .offset(x: metrics.opticalOffset)
         }
         .frame(width: metrics.diameter, height: metrics.diameter)
     }
