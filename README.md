@@ -328,6 +328,22 @@ in-app settings screen for this — the native sheet is the whole interface.
 > each playlist's most recent play date, which both processes can see. Shuffles
 > started from the widget's own buttons are recorded locally and take priority.
 
+The extension **inherits the app's media library permission** — you grant access
+once, in the app, and the widget can read playlists from its own process.
+Verified on iOS 26.5.2.
+
+> [!NOTE]
+> This is worth stating because the public evidence suggests otherwise. Apple
+> bug report FB11566125 — *"MPMediaLibrary.authorizationStatus() is always
+> .denied in Widget Extension"*, filed against iOS 16.1 and still marked Open —
+> describes this exact combination and reports it as a regression from iOS 15.
+> It does not reproduce here. Treat that radar as stale rather than current.
+>
+> An extension still can't *request* access, though: there's no UI in which to
+> present the prompt. The app remains the only place that can ask, which is why
+> the widget falls back to "Open True Shuffle to allow access to your music"
+> rather than trying to prompt.
+
 ## Project layout
 
 ```
