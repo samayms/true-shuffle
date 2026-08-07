@@ -233,6 +233,23 @@ security cms -D -i <path>/TrueShuffle.app/PlugIns/TrueShuffleWidgetExtension.app
   | plutil -p - | grep ExpirationDate
 ```
 
+#### Checking on it later
+
+One block that answers "is this still working?":
+
+```bash
+tail -1 ~/.local/state/true-shuffle/resign.log     # last outcome
+cat ~/.local/state/true-shuffle/last-resign        # date of last success
+brew services list | grep sleepwatcher             # daemon still started?
+tail -1 ~/.wakeup                                  # hook still points at the repo
+xcrun devicectl list devices | grep -i iphone      # phone reachable?
+```
+
+Healthy looks like a `SUCCESS: reinstalled TrueShuffle` line dated within the
+last few days, `sleepwatcher started`, and the phone listed. The date matters
+more than the word: a success from nine days ago means the app has already
+expired.
+
 #### Testing the wake trigger itself
 
 `resign.sh --force` proves the *build and install* work. It does not prove that
