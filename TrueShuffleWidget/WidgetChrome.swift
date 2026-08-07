@@ -14,6 +14,19 @@ enum WidgetChrome {
     static let rowFill = Color.white.opacity(0.06)
     static let hairline = Color(red: 0.329, green: 0.329, blue: 0.345).opacity(0.45)
     static let widgetRadius: CGFloat = 24
+
+    /// How far to lift a row's name/detail pair so it looks vertically centred.
+    ///
+    /// Centring the pair by its layout box leaves it looking about a point low,
+    /// because the box is padded by type metrics the eye doesn't see: unused
+    /// ascender space above the name's capitals, and descender space below the
+    /// detail line. Measured against a render, the visible ink lands 1pt below
+    /// the row's true centre, so the pair is raised by that much.
+    ///
+    /// This is what makes a divider look wrong before it is applied: the gap
+    /// above a hairline comes out around 4pt against 6pt below it, even though
+    /// the boxes either side are exactly symmetric.
+    static let rowTextOpticalRise: CGFloat = 1
 }
 
 /// The right-pointing play triangle.
@@ -44,19 +57,27 @@ struct PlayBadge: View {
         let diameter: CGFloat
         let triangleWidth: CGFloat
         let triangleHeight: CGFloat
+
         /// How far right of the circle's geometric centre the triangle sits.
         ///
-        /// This is *half* the design's `margin-left`, and that halving is the
-        /// whole subtlety. The margin is on a flex item in a `justify-content:
-        /// center` container, so it widens the item's outer box and the browser
-        /// then centres that wider box — moving the triangle by only half the
-        /// margin. Applying the full value puts it visibly off-centre.
-        let offset: CGFloat
+        /// A triangle's centroid is one third of the way from base to apex, but
+        /// its bounding box centres at one half — so a box-centred triangle
+        /// always reads as sitting left. Shifting by the difference,
+        /// `w/2 - w/3 = w/6`, puts the centre of mass on the circle's centre,
+        /// which is what the eye actually judges.
+        ///
+        /// The design expresses the same intent as a `margin-left` nudge, but
+        /// transcribing that number is a trap: the margin sits on a flex item
+        /// in a `justify-content: center` container, so it widens the item's
+        /// outer box and the browser re-centres *that*, moving the triangle by
+        /// only half the stated value. The centroid rule is what it was
+        /// approximating, so use it directly.
+        var opticalOffset: CGFloat { triangleWidth / 6 }
 
-        /// The small widget's badge: 34pt, `margin-left: 3px`.
-        static let large = Metrics(diameter: 34, triangleWidth: 11, triangleHeight: 13, offset: 1.5)
-        /// Medium and large widgets: 26pt, `margin-left: 2px`.
-        static let small = Metrics(diameter: 26, triangleWidth: 8, triangleHeight: 10, offset: 1)
+        /// The small widget's badge.
+        static let large = Metrics(diameter: 34, triangleWidth: 11, triangleHeight: 13)
+        /// Medium and large widgets.
+        static let small = Metrics(diameter: 26, triangleWidth: 8, triangleHeight: 10)
     }
 
     let metrics: Metrics
@@ -67,9 +88,7 @@ struct PlayBadge: View {
             PlayTriangle()
                 .fill(.white)
                 .frame(width: metrics.triangleWidth, height: metrics.triangleHeight)
-                // A triangle's mass sits toward its base, so a geometrically
-                // centred one reads as sitting too far left.
-                .offset(x: metrics.offset)
+                .offset(x: metrics.opticalOffset)
         }
         .frame(width: metrics.diameter, height: metrics.diameter)
     }

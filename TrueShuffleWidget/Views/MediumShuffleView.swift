@@ -57,6 +57,7 @@ struct MediumShuffleView: View {
                     .lineLimit(1)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
+            .offset(y: -WidgetChrome.rowTextOpticalRise)
 
             PlayBadge(metrics: .small)
         }
