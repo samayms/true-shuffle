@@ -38,24 +38,40 @@ struct PlayTriangle: Shape {
 /// Purely visual — the tap target is the whole row's `Button`, which is why this
 /// is a plain view and not a control.
 struct PlayBadge: View {
-    /// 34 in the small widget, 26 in medium and large.
-    let diameter: CGFloat
+    /// The design gives each badge size its own triangle rather than scaling one,
+    /// so both sets of numbers are transcribed instead of derived.
+    struct Metrics {
+        let diameter: CGFloat
+        let triangleWidth: CGFloat
+        let triangleHeight: CGFloat
+        /// How far right of the circle's geometric centre the triangle sits.
+        ///
+        /// This is *half* the design's `margin-left`, and that halving is the
+        /// whole subtlety. The margin is on a flex item in a `justify-content:
+        /// center` container, so it widens the item's outer box and the browser
+        /// then centres that wider box — moving the triangle by only half the
+        /// margin. Applying the full value puts it visibly off-centre.
+        let offset: CGFloat
 
-    private var triangleWidth: CGFloat { diameter * (11.0 / 34.0) }
-    private var triangleHeight: CGFloat { diameter * (13.0 / 34.0) }
-    private var opticalOffset: CGFloat { diameter * (3.0 / 34.0) }
+        /// The small widget's badge: 34pt, `margin-left: 3px`.
+        static let large = Metrics(diameter: 34, triangleWidth: 11, triangleHeight: 13, offset: 1.5)
+        /// Medium and large widgets: 26pt, `margin-left: 2px`.
+        static let small = Metrics(diameter: 26, triangleWidth: 8, triangleHeight: 10, offset: 1)
+    }
+
+    let metrics: Metrics
 
     var body: some View {
         ZStack {
             Circle().fill(Theme.signal)
             PlayTriangle()
                 .fill(.white)
-                .frame(width: triangleWidth, height: triangleHeight)
-                // The triangle's visual centre of mass sits left of its bounding
-                // box, so centring it geometrically makes it look off-centre.
-                .offset(x: opticalOffset)
+                .frame(width: metrics.triangleWidth, height: metrics.triangleHeight)
+                // A triangle's mass sits toward its base, so a geometrically
+                // centred one reads as sitting too far left.
+                .offset(x: metrics.offset)
         }
-        .frame(width: diameter, height: diameter)
+        .frame(width: metrics.diameter, height: metrics.diameter)
     }
 }
 

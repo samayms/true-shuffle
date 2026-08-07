@@ -58,7 +58,7 @@ struct MediumShuffleView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 
-            PlayBadge(diameter: 26)
+            PlayBadge(metrics: .small)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         // An overlay rather than a `Divider`: in the design the hairline is

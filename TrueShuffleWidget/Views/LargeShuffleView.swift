@@ -54,7 +54,7 @@ struct LargeShuffleView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 
-            PlayBadge(diameter: 26)
+            PlayBadge(metrics: .small)
         }
         .padding(.horizontal, 12)
         // No vertical padding by design: row height comes entirely from the

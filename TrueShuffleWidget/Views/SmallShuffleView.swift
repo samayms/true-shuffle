@@ -36,7 +36,12 @@ struct SmallShuffleView: View {
                     .foregroundStyle(Theme.primaryText)
                     // The design caps the name at a 44pt box on a 19pt/1.15
                     // line — two lines — and lets the rest fall off the end.
-                    .lineSpacing(19 * 0.15)
+                    //
+                    // No `lineSpacing` here: CSS `line-height` sets the whole
+                    // line box, whereas `lineSpacing` adds *on top of* the
+                    // font's natural leading. SF at 19pt already lays out at
+                    // roughly 1.19, so asking for another 15% would push two
+                    // lines well past the 44pt the design allows.
                     .lineLimit(2)
                     .truncationMode(.tail)
                     .multilineTextAlignment(.leading)
@@ -51,7 +56,7 @@ struct SmallShuffleView: View {
             // playlist name both sit on the same baseline above the badge.
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
 
-            PlayBadge(diameter: 34)
+            PlayBadge(metrics: .large)
                 .padding(.top, 10)
                 .frame(maxWidth: .infinity, alignment: .trailing)
         }
