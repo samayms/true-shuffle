@@ -244,13 +244,14 @@ tail -1 ~/.local/state/true-shuffle/resign.log     # last outcome
 cat ~/.local/state/true-shuffle/last-resign        # date of last success
 brew services list | grep sleepwatcher             # daemon still started?
 tail -1 ~/.wakeup                                  # hook still points at the repo
-xcrun devicectl list devices | grep -i iphone      # phone reachable?
+xcrun devicectl list devices                       # is phone state "connected"?
 ```
 
 Healthy looks like a `SUCCESS: reinstalled TrueShuffle` line dated within the
-last few days, `sleepwatcher started`, and the phone listed. The date matters
-more than the word: a success from nine days ago means the app has already
-expired.
+last few days, `sleepwatcher started`, and the phone's State shown as
+`connected`. A paired but offline phone remains listed as `unavailable`, which
+is not reachable. The date matters more than the word: a success from nine days
+ago means the app has already expired.
 
 #### Testing the wake trigger itself
 

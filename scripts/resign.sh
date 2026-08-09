@@ -45,6 +45,29 @@ list_devices() {
     || print "  none found — is the iPhone paired and on the same Wi-Fi?"
 }
 
+# `devicectl list devices` includes paired devices that are currently offline,
+# so finding the identifier in its table output is not enough. Consume its
+# supported JSON interface and require an active CoreDevice tunnel.
+device_is_reachable() {
+  local device_json listed_id tunnel_state
+  device_json="$(mktemp)" || return 1
+
+  if ! xcrun devicectl list devices \
+        --filter "identifier == '${DEVICE_ID}'" \
+        --json-output "$device_json" \
+        --quiet \
+        >/dev/null 2>&1; then
+    unlink "$device_json"
+    return 1
+  fi
+
+  listed_id="$(plutil -extract result.devices.0.identifier raw -o - "$device_json" 2>/dev/null)"
+  tunnel_state="$(plutil -extract result.devices.0.connectionProperties.tunnelState raw -o - "$device_json" 2>/dev/null)"
+  unlink "$device_json"
+
+  [[ "$listed_id" == "$DEVICE_ID" && "$tunnel_state" == "connected" ]]
+}
+
 # --- Argument handling -------------------------------------------------------
 
 FORCE=0
@@ -82,7 +105,7 @@ fi
 # worth alerting about — it's a laptop opened away from home. Exit without
 # recording success so the next wake tries again.
 
-if ! xcrun devicectl list devices 2>/dev/null | grep -q "$DEVICE_ID"; then
+if ! device_is_reachable; then
   log "device ${DEVICE_ID} not reachable; will retry on next wake"
   exit 0
 fi
@@ -132,6 +155,14 @@ while (( attempt <= MAX_ATTEMPTS )); do
   # "could not write to device" is common and usually transient, so a retry
   # is the documented remedy rather than a sign of real breakage.
   log "attempt ${attempt} failed"
+
+  # The phone can leave Wi-Fi or lock down its developer tunnel after the
+  # preflight. That is still an availability deferral, not a signing failure.
+  if ! device_is_reachable; then
+    log "device ${DEVICE_ID} became unreachable; will retry on next wake"
+    exit 0
+  fi
+
   (( attempt++ ))
   (( attempt <= MAX_ATTEMPTS )) && sleep $(( attempt * 15 ))
 done
