@@ -8,6 +8,7 @@ import SwiftUI
 /// would be a worse copy of something the user already has.
 struct PlaylistPickerView: View {
     @State private var model = PlaylistPickerModel()
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
         ZStack {
@@ -15,7 +16,11 @@ struct PlaylistPickerView: View {
             content
         }
         .preferredColorScheme(.dark)
-        .task { await model.start() }
+        .task(id: scenePhase) {
+            guard scenePhase == .active else { return }
+            await model.start()
+            await model.refreshPeriodically()
+        }
         .alert(
             "Couldn’t shuffle",
             isPresented: $model.isShowingError,

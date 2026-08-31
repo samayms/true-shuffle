@@ -114,6 +114,22 @@ final class PlaylistPickerModel {
         await reload()
     }
 
+    /// Keep the visible counts in step with changes made in Music while the
+    /// picker is open. The task is cancelled automatically when the view goes
+    /// off-screen or the app becomes inactive.
+    func refreshPeriodically() async {
+        while !Task.isCancelled {
+            do {
+                try await Task.sleep(for: .seconds(60))
+            } catch {
+                return
+            }
+
+            guard !Task.isCancelled else { return }
+            await reload()
+        }
+    }
+
     func reload() async {
         #if DEBUG
         if SampleData.isEnabled {
