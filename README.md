@@ -193,9 +193,10 @@ opening. No tool removes that limit, but it can be fully automated:
 ```
 
 This installs [SleepWatcher](https://www.bernhard-baehr.de/), points `~/.wakeup`
-at `scripts/resign.sh`, and unlocks the codesigning key for non-interactive use.
-The first time you open your Mac each day, the app is rebuilt and reinstalled
-over Wi-Fi.
+at `scripts/resign.sh`, installs a per-user `launchd` check, and unlocks the
+codesigning key for non-interactive use. The Mac checks every 15 minutes and
+rebuilds/reinstalls the app once per day whenever the iPhone is reachable over
+Wi-Fi, including when Wi-Fi returns after the Mac has already woken.
 
 > [!WARNING]
 > The keychain step in `setup-automation.sh` is mandatory, not optional. Without
@@ -242,7 +243,8 @@ One block that answers "is this still working?":
 ```bash
 tail -1 ~/.local/state/true-shuffle/resign.log     # last outcome
 cat ~/.local/state/true-shuffle/last-resign        # date of last success
-brew services list | grep sleepwatcher             # daemon still started?
+brew services list | grep sleepwatcher             # wake daemon still started?
+launchctl print gui/$(id -u)/com.true-shuffle.resign # periodic check loaded?
 tail -1 ~/.wakeup                                  # hook still points at the repo
 xcrun devicectl list devices                       # is phone state "connected"?
 ```
@@ -267,17 +269,18 @@ pmset sleepnow
 tail ~/.local/state/true-shuffle/resign.log
 ```
 
-A fresh `starting re-sign for device …` line timestamped after the wake means
-the whole chain works: SleepWatcher → `~/.wakeup` → `resign.sh`.
+A fresh `starting re-sign for device …` line means the deployment chain works.
+It may come from either SleepWatcher → `~/.wakeup` or the periodic launchd
+check → `resign.sh`.
 
 #### Where this still breaks
 
 "Automated" is not "unconditional". Three things will silently stop it, and you
 won't find out until the app refuses to open:
 
-- **The Mac must wake at least once every 7 days.** SleepWatcher triggers on
-  wake; no wake, no re-sign. If your Mac tends to stay running for days, a
-  `launchd` agent on a calendar interval is the more robust trigger.
+- **The periodic launchd agent must remain loaded.** SleepWatcher is retained
+  as a wake-time trigger, while launchd checks every 15 minutes for cases
+  where the Mac stays awake or Wi-Fi returns later.
 - **The iPhone must be on the same Wi-Fi at that moment.** If it isn't, the run
   logs the miss and exits *without* recording success, so the next wake retries.
 - **Wireless deploy is genuinely flaky.** `resign.sh` already retries three
